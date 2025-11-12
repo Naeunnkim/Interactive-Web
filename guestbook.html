@@ -1,0 +1,179 @@
+<section class="guestbook">
+  <h3>방명록</h3>
+  <form id="gb-form" autocomplete="off">
+    <input id="gb-name" placeholder="닉네임" required maxlength="20">
+    <textarea id="gb-message" placeholder="메시지" required maxlength="500"></textarea>
+    <button type="submit">남기기</button>
+  </form>
+
+  <div class="gb-tools">
+    <button id="gb-export">JSON 내보내기</button>
+    <label class="gb-import-label">
+      JSON 가져오기 <input id="gb-import" type="file" accept="application/json" hidden>
+    </label>
+    <button id="gb-clear" title="모든 항목 삭제" style="opacity:.8">전체삭제</button>
+  </div>
+
+  <script>
+    (() => {
+    // ---------- IndexedDB wrapper ----------
+    const DB_NAME = 'guestbookDB';
+    const STORE = 'entries';
+    const DB_VERSION = 1;
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE)) {
+            const os = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+            os.createIndex('createdAt', 'createdAt', { unique: false });
+            }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function txStore(mode='readonly') {
+        const db = await openDB();
+        const tx = db.transaction(STORE, mode);
+        return [tx, tx.objectStore(STORE)];
+    }
+
+    async function addEntry(entry) {
+        const [tx, store] = await txStore('readwrite');
+        store.add(entry);
+        return await tx.complete;
+    }
+
+    async function getAllEntriesDesc() {
+        const [tx, store] = await txStore('readonly');
+        const idx = store.index('createdAt');
+        const req = idx.openCursor(null, 'prev'); // 최신순
+        return await new Promise((resolve, reject) => {
+        const out = [];
+        req.onsuccess = e => {
+            const cur = e.target.result;
+            if (cur) { out.push(cur.value); cur.continue(); }
+            else resolve(out);
+        };
+        req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function clearAll() {
+        const [tx, store] = await txStore('readwrite');
+        store.clear();
+        return await tx.complete;
+    }
+
+    async function bulkInsert(entries = []) {
+        const [tx, store] = await txStore('readwrite');
+        for (const e of entries) store.add(e);
+        return await tx.complete;
+    }
+
+    // ---------- Utilities ----------
+    const escapeHTML = s => s.replace(/[<>&"'`]/g, c => ({
+        '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','`':'&#96;'
+    }[c]));
+    const nowISO = () => new Date().toISOString();
+
+    // ---------- DOM ----------
+    const form   = document.getElementById('gb-form');
+    const nameEl = document.getElementById('gb-name');
+    const msgEl  = document.getElementById('gb-message');
+    const listEl = document.getElementById('gb-list');
+    const btnExport = document.getElementById('gb-export');
+    const inpImport = document.getElementById('gb-import');
+    const btnClear  = document.getElementById('gb-clear');
+
+    async function render() {
+        const items = await getAllEntriesDesc();
+        listEl.innerHTML = '';
+        for (const it of items) {
+        const li = document.createElement('li');
+        const date = new Date(it.createdAt || it.created_at || Date.now());
+        li.innerHTML = `
+            <div class="gb-meta">
+            <span class="gb-name">${escapeHTML(it.name || '')}</span>
+            · <span>${date.toLocaleString()}</span>
+            </div>
+            <div class="gb-msg">${(it.message || '').split('\n').map(escapeHTML).join('<br>')}</div>
+        `;
+        listEl.appendChild(li);
+        }
+    }
+
+    // 초기 렌더
+    render();
+
+    // 작성
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = nameEl.value.trim();
+        const message = msgEl.value.trim();
+        if (!name || !message) return;
+        await addEntry({
+        name, message,
+        createdAt: nowISO(),
+        userAgent: navigator.userAgent.slice(0,160)
+        });
+        form.reset();
+        render();
+    });
+
+    // 내보내기
+    btnExport.addEventListener('click', async () => {
+        const data = await getAllEntriesDesc();
+        // 가져오기 호환을 위해 id 제거(옵션)
+        const exportData = data.map(({id, ...rest}) => rest);
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
+        const url  = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `guestbook_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    });
+
+    // 가져오기
+    inpImport.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        try {
+        const arr = JSON.parse(text);
+        if (!Array.isArray(arr)) throw new Error('Invalid JSON');
+        // createdAt 없으면 지금 시간 채워 넣기
+        const normalized = arr.map(o => ({
+            name: String(o.name || '').slice(0,20),
+            message: String(o.message || '').slice(0,500),
+            createdAt: o.createdAt || nowISO(),
+            userAgent: o.userAgent || 'import'
+        }));
+        await bulkInsert(normalized);
+        await render();
+        e.target.value = ''; // same file re-import 가능하도록 초기화
+        alert('가져오기가 완료되었습니다.');
+        } catch(err) {
+        alert('가져오기 실패: ' + err.message);
+        }
+    });
+
+    // 전체 삭제
+    btnClear.addEventListener('click', async () => {
+        if (!confirm('정말 모든 방명록을 삭제하시겠습니까?')) return;
+        await clearAll();
+        await render();
+    });
+    })();
+</script>
+
+
+  <ul id="gb-list"></ul>
+</section>

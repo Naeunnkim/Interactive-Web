@@ -1,0 +1,229 @@
+/* 로컬 폰트 등록 */
+@font-face{
+  font-family: 'Euphorigenic';
+  src:
+    /* url('fonts/euphorigenic.woff2') format('woff2'),   /* 있으면 최우선 */
+    /* url('fonts/euphorigenic.woff') format('woff'),     선택 */
+    url('images/designsources/euphorigenic.otf') format('opentype');  /* 현재 파일 */
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html, body {
+  font-family: 'Euphorigenic', 'Noto Serif KR', serif; /* 한글 대체폰트도 함께 */
+}
+
+
+/* 기본적인 스타일 초기화 및 배경 */
+body {
+    margin: 0;
+    background-color: #030604; /* 검은색 배경 */
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    
+    /* 뷰포트 전체를 사용하고 중앙 정렬 */
+    min-height: 100vh; /* 뷰포트 높이 100% 사용 */
+    display: flex; /* Flexbox로 내부 콘텐츠를 중앙 정렬 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+/* 웹사이트 제목 (Poison Garden) */
+h1 {
+    font-family: 'Times New Roman', serif; /* 고풍스러운 느낌의 폰트 */
+    margin-bottom: 2vh; /* 뷰포트 높이에 비례한 마진 */
+    letter-spacing: 5px;
+    font-size: 3em;
+    margin: 2vh 0; /* 상하 마진만 적당히 */
+}
+
+.title-image {
+    width: 60vw;
+    height: 80px;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    align-self: center;
+}
+
+/* for menu bar */
+/* 아이콘+사이드바 래퍼: 화면 왼쪽 중앙 고정 */
+.side-wrap {
+  position: fixed;
+  left: 5%;
+  top: 10%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center; /* 아이콘 왼쪽, 메뉴 오른쪽으로 나란히 */
+  gap: 8px;
+}
+
+/* 작은 메뉴 아이콘 버튼 */
+.menu-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #0b0f0d;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* 텍스트형 사이드 메뉴 (기본: 숨김 상태) */
+.side-menu {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+
+  background: rgba(3,6,4,0.9);
+  border: 1px solid #222;
+  border-left: none;
+  backdrop-filter: blur(6px);
+  border-radius: 0 12px 12px 0;
+
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;         /* 펼쳐졌을 때 세로 여백 */
+  transition: width .22s ease, opacity .18s ease;
+}
+
+/* 항목(텍스트) */
+.menu-link {
+  display: block;
+  padding: 12px 16px 12px 18px;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  border-left: 3px solid transparent;
+  font-size: 15px;
+}
+.menu-link:hover {
+  background: #101614;
+  border-left-color: #6a6a6a;
+}
+
+/* ▼ 아이콘이나 메뉴 영역에 hover되면 메뉴 펼침 */
+.side-wrap:hover .side-menu,
+.side-wrap:has(.menu-fab:focus-visible) .side-menu {
+  width: 220px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* (선택) 모바일/터치: 항상 펼쳐두기 */
+@media (hover:none) and (pointer:coarse) {
+  .side-wrap { top: 0; transform: none; }
+  .menu-fab { display: none; }
+  .side-menu { width: 220px; opacity: 1; pointer-events: auto; border-radius: 0 0 12px 0; }
+}
+
+
+
+
+
+/* 갤러리 그리드 컨테이너 */
+.gallery-grid {
+    display: grid;
+    /* 6개의 동일한 너비의 열 (6x3 그리드) */
+    grid-template-columns: repeat(6, 1fr);
+    /* 3개의 동일한 높이의 행 */
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1.5vh;
+
+    /* 그리드 전체 영역 크기 설정 (화면 비율에 맞춰 한 화면에 표시) */
+    max-width: 1600px;
+    max-height: 80vh; /* 화면 높이의 80% 사용 */
+    width: 60vw;
+    margin-bottom: 30px;
+    justify-content: center; /* ← grid 자체의 중앙 정렬 */
+    align-items: center;     /* ← 수직 중앙 정렬 */
+    align-content: center;
+  
+}
+
+/* 버튼 스타일 (식물 이미지) */
+/* <a> 태그를 사용하여 클릭 가능한 버튼 역할 수행 */
+.plant-button {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: #9e9e9e solid 0.3px;
+
+    /* 각 셀은 그리드 행의 높이를 채우고 폭은 종횡비에 따라 결정 */  
+    align-self: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.plant-button:hover {
+    transform: scale(1.05); /* 마우스 오버 시 확대 효과 */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* 테두리 발광 효과 */
+}
+
+/* 이미지 스타일 */
+.plant-image {
+    /* 셀의 높이에 맞추되, 가로는 자동으로 조정하여 잘리지 않게 표시 */
+    display: block;
+    height: 100%;
+    width: auto;
+    object-fit: contain; /* 이미지 전체를 보이게 함 */
+    align-self: center;
+    align-content: center;
+    align-items: center;
+}
+
+.plant-title {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.popup-img {
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #000;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.plant-title:hover .popup-img {
+  display: block; /* hover 시 보이기 */
+}
+
+/* 방명록 테스트 */
+.guestbook { margin-top: 24px; }
+.guestbook h3 { margin: 0 0 12px; }
+#gb-form { display: grid; gap: 10px; }
+#gb-name, #gb-message {
+  background: rgba(255,255,255,0.06); color: #fff; border: 1px solid #444;
+  padding: 10px; border-radius: 8px; font-family: inherit;
+}
+#gb-message { min-height: 90px; resize: vertical; }
+#gb-form button, .gb-tools button, .gb-import-label {
+  display: inline-block; margin-top: 6px; padding: 8px 14px; border-radius: 10px;
+  border: 1px solid #555; background: #0b0f0d; color: #fff; cursor: pointer;
+}
+.gb-tools { display:flex; gap:10px; align-items:center; margin: 8px 0 14px; }
+.gb-import-label { cursor: pointer; }
+#gb-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+#gb-list li {
+  border: 1px solid #333; border-radius: 12px; padding: 12px; background: rgba(0,0,0,0.35);
+}
+.gb-meta { font-size: 12px; color: #bcbcbc; opacity: .9; margin-bottom: 6px;}
+.gb-name { font-weight: 700; }
