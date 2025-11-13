@@ -11,7 +11,7 @@ let W, H; // 동적으로 할당
 
 function preload(){
   for (let i = 0; i < totalFrames; i++){
-    frames[i] = loadImage(`images/frames04/${i+1}.jpg`);
+    frames[i] = loadImage(`images/frames09/${i+1}.jpg`);
   }
 }
 
