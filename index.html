@@ -1,120 +1,246 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#030604">
-    <title>Poison Garden</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Poison Garden</title>
+
+<link rel="stylesheet" href="style.css" />
+
+<style>
+  :root{
+    --stage-w: min(92vw, 1700px);
+    --gap: clamp(14px, 1.2vw, 24px);
+    --frame-pad: clamp(20px, 3vw, 56px);      /* 프레임 안쪽 여백(모서리 장식 피하기) */
+    --title-top: clamp(10px, 1.8vw, 22px);    /* 타이틀 y 위치 */
+  }
+  html,body{height:100%}
+  body{
+    margin:0; background:#030604; color:#fff;
+    display:grid; place-items:center; overflow:hidden;
+    font-family: 'Euphorigenic','Noto Serif KR', serif;
+  }
+
+  /* 16:9 중앙 스테이지 */
+  .stage{
+    width: var(--stage-w);
+    aspect-ratio: 16/9;
+    position: relative;
+  }
+
+  /* 배경 프레임 PNG: 투명 중앙 + 흰 라인/코너 */
+  .frame{
+    position:absolute; inset:0;
+    background: url("images/designsources/indexFrame.png") center/contain no-repeat;
+  }
+
+  /* 실제 콘텐츠 영역(프레임 안쪽 안전 구역) */
+  .content{
+    position:absolute; inset:0;
+    /* padding: 30px; */
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center;
+  }
+
+  /* 갤러리 그리드: 6열(가변), 여백 균등 */
+  .gallery-grid{
+    width:60%;                   /* ← 전체 폭 대비 살짝 여유 */
+    max-width: 1100px;           /* ← 프레임 안쪽에 fit */
+    margin-top: clamp(48px, 10vh, 120px);
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--gap);
+    justify-items:center;
+    align-items:center;
+    margin-inline:auto;
+  }
+  @media (max-width:1400px){ .gallery-grid{ grid-template-columns: repeat(5, 1fr);} }
+  @media (max-width:1100px){ .gallery-grid{ grid-template-columns: repeat(4, 1fr);} }
+  @media (max-width:860px) { .gallery-grid{ grid-template-columns: repeat(3, 1fr);} }
+
+  .plant-button{ 
+    display:flex; width:100%; aspect-ratio: 3/4;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    border: none;
+}
+
+  .plant-image{
+    width:100%;
+    height:100%;
+    object-fit:contain;        /* 비율 유지해서 꽉 넣기 */
+    display:block;
+    background:transparent;    /* 필요하면 #000 으로 바꿔도 됨 */
+    box-shadow:none;           /* 이전에 넣어둔 inset 라인 제거 */
+    border:none;
+  }
+  .plant-image:hover{
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.15) inset;
+    opacity: .95;
+  }
+
+  /* (선택) 좌측 호버 메뉴 유지하고 싶으면 주석 해제 */
+  .side-wrap{ position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:20; }
+  .menu-fab{ width:40px; height:40px; border-radius:50%; border:1px solid #333;
+             background:rgba(0,0,0,.5); color:#fff; cursor:pointer; }
+  .side-menu{ display:none; position:absolute; left:48px; top:0; background:rgba(0,0,0,.7);
+              border:1px solid #333; border-radius:8px; padding:8px 10px; }
+  .side-wrap:hover .side-menu{ display:block; }
+  .menu-link{ display:block; padding:6px 8px; color:#fff; text-decoration:none; font-size:14px; }
+  .menu-link:hover{ text-decoration:underline; }
+</style>
 </head>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const imgs = document.querySelectorAll('.plant-image[data-bm]');
+
+    imgs.forEach(img => {
+        const original = img.getAttribute('src');
+        const bm       = img.getAttribute('data-bm');
+
+        // 원본 경로 저장
+        img.dataset.original = original;
+
+        img.addEventListener('mouseenter', () => {
+        img.src = bm;
+        });
+
+        img.addEventListener('mouseleave', () => {
+        img.src = img.dataset.original;
+        });
+    });
+    });
+</script>
+
 <body>
-    <!-- <nav class="side_menu">
-        <a class="menu-item" href="index.html" aria-label="홈" data-label="홈">
-            <span class="menu-icon">🏠</span>
-        </a>
+  <!-- (선택) 좌측 호버 메뉴 -->
+  <nav class="side-wrap">
+    <button class="menu-fab" aria-label="메뉴 열기">☰</button>
+    <aside class="side-menu">
+      <a class="menu-link" href="index.html">홈</a>
+      <a class="menu-link" href="guestbook.html">방명록</a>
+    </aside>
+  </nav>
 
-        <a class="menu-item" href="guestbook.html" aria-label="방명록" data-label="방명록">
-            <span class="menu-icon">✍️</span>
-            <img src="images/icons/guestbook.svg" alt="" class="menu-icon-img">
-        </a>
-    </nav> -->
+  <main class="stage">
+    <div class="frame" aria-hidden="true"></div>
 
-    <!-- 페이지 맨 위 body 바로 안쪽에 배치 -->
-    <nav class="side-wrap">
-        <!-- 작은 메뉴 아이콘(hover 트리거) -->
-        <button class="menu-fab" aria-label="메뉴 열기">☰</button>
-
-        <!-- hover 시 나타나는 텍스트 메뉴바 -->
-        <aside class="side-menu">
-            <a class="menu-link" href="index.html">홈</a>
-            <a class="menu-link" href="guestbook.html">방명록</a>
-            <!-- 필요하면 더 추가 -->
-            <!-- <a class="menu-link" href="about.html">소개</a> -->
-        </aside>
-    </nav>
-
-
-    <div>
-        <img src="images/designsources/logo.png" alt="Poison Garden Title" class="title-image">
-    </div>
-
-    <div class="gallery-grid">
-        
+    <div class="content">
+      <!-- 갤러리 -->
+      <div class="gallery-grid">
         <a href="detail01.html" class="plant-button">
-            <img src="images/plant/01_f.jpg" alt="Poison Plant 1" class="plant-image">
+            <img src="images/plant/1.png"
+                data-bm="images/plant_bitmap/1_bm.png"
+                class="plant-image" alt="Poison Plant 1">
         </a>
-        
+
         <a href="detail02.html" class="plant-button">
-            <img src="images/plant/02_f.jpg" alt="Poison Plant 2" class="plant-image">
+            <img src="images/plant/2.png"
+                data-bm="images/plant_bitmap/2_bm.png"
+                class="plant-image" alt="Poison Plant 2">
         </a>
-        
+
         <a href="detail03.html" class="plant-button">
-            <img src="images/plant/03_f.jpg" alt="Poison Plant 3" class="plant-image">
+            <img src="images/plant/3.png"
+                data-bm="images/plant_bitmap/3_bm.png"
+                class="plant-image" alt="Poison Plant 3">
         </a>
-        
+
         <a href="detail04.html" class="plant-button">
-            <img src="images/plant/04_f.jpg" alt="Poison Plant 4" class="plant-image">
+            <img src="images/plant/4.png"
+                data-bm="images/plant_bitmap/4_bm.png"
+                class="plant-image" alt="Poison Plant 4">
         </a>
-        
+
         <a href="detail05.html" class="plant-button">
-            <img src="images/plant/05_f.jpg" alt="Poison Plant 5" class="plant-image">
+            <img src="images/plant/5.png"
+                data-bm="images/plant_bitmap/5_bm.png"
+                class="plant-image" alt="Poison Plant 5">
         </a>
-        
+
         <a href="detail06.html" class="plant-button">
-            <img src="images/plant/06_f.jpg" alt="Poison Plant 6" class="plant-image">
+            <img src="images/plant/6.png"
+                data-bm="images/plant_bitmap/6_bm.png"
+                class="plant-image" alt="Poison Plant 6">
         </a>
-        
+
         <a href="detail07.html" class="plant-button">
-            <img src="images/plant/07_f.jpg" alt="Poison Plant 7" class="plant-image">
+            <img src="images/plant/7.png"
+                data-bm="images/plant_bitmap/7_bm.png"
+                class="plant-image" alt="Poison Plant 7">
         </a>
-        
+
         <a href="detail08.html" class="plant-button">
-            <img src="images/plant/08_f.jpg" alt="Poison Plant 8" class="plant-image">
+            <img src="images/plant/8.png"
+                data-bm="images/plant_bitmap/8_bm.png"
+                class="plant-image" alt="Poison Plant 8">
         </a>
-        
+
         <a href="detail09.html" class="plant-button">
-            <img src="images/plant/09_f.jpg" alt="Poison Plant 9" class="plant-image">
+            <img src="images/plant/9.png"
+                data-bm="images/plant_bitmap/9_bm.png"
+                class="plant-image" alt="Poison Plant 9">
         </a>
-        
+
         <a href="detail10.html" class="plant-button">
-            <img src="images/plant/10_f.jpg" alt="Poison Plant 10" class="plant-image">
+            <img src="images/plant/10.png"
+                data-bm="images/plant_bitmap/10_bm.png"
+                class="plant-image" alt="Poison Plant 10">
         </a>
-        
+
         <a href="detail11.html" class="plant-button">
-            <img src="images/plant/11_f.jpg" alt="Poison Plant 11" class="plant-image">
+            <img src="images/plant/11.png"
+                data-bm="images/plant_bitmap/11_bm.png"
+                class="plant-image" alt="Poison Plant 11">
         </a>
-        
+
         <a href="detail12.html" class="plant-button">
-            <img src="images/plant/12_f.jpg" alt="Poison Plant 12" class="plant-image">
+            <img src="images/plant/12.png"
+                data-bm="images/plant_bitmap/12_bm.png"
+                class="plant-image" alt="Poison Plant 12">
         </a>
 
         <a href="detail13.html" class="plant-button">
-            <img src="images/plant/13_f.jpg" alt="Poison Plant 13" class="plant-image">
+            <img src="images/plant/13.png"
+                data-bm="images/plant_bitmap/13_bm.png"
+                class="plant-image" alt="Poison Plant 13">
         </a>
-        
+
         <a href="detail14.html" class="plant-button">
-            <img src="images/plant/14_f.jpg" alt="Poison Plant 14" class="plant-image">
+            <img src="images/plant/14.png"
+                data-bm="images/plant_bitmap/14_bm.png"
+                class="plant-image" alt="Poison Plant 14">
         </a>
-        
+
         <a href="detail15.html" class="plant-button">
-            <img src="images/plant/15_f.jpg" alt="Poison Plant 15" class="plant-image">
+            <img src="images/plant/15.png"
+                data-bm="images/plant_bitmap/15_bm.png"
+                class="plant-image" alt="Poison Plant 15">
         </a>
-        
+
         <a href="detail16.html" class="plant-button">
-            <img src="images/plant/16_f.jpg" alt="Poison Plant 16" class="plant-image">
+            <img src="images/plant/16.png"
+                data-bm="images/plant_bitmap/16_bm.png"
+                class="plant-image" alt="Poison Plant 16">
         </a>
-        
+
         <a href="detail17.html" class="plant-button">
-            <img src="images/plant/17_f.jpg" alt="Poison Plant 17" class="plant-image">
+            <img src="images/plant/17.png"
+                data-bm="images/plant_bitmap/17_bm.png"
+                class="plant-image" alt="Poison Plant 17">
         </a>
-        
+
         <a href="detail18.html" class="plant-button">
-            <img src="images/plant/18_f.jpg" alt="Poison Plant 18" class="plant-image">
+            <img src="images/plant/18.png"
+                data-bm="images/plant_bitmap/18_bm.png"
+                class="plant-image" alt="Poison Plant 18">
         </a>
-        
+      </div>
+
     </div>
-    </body>
+  </main>
+</body>
 </html>
