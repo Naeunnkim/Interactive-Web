@@ -16,7 +16,7 @@
   }
   html,body{height:100%}
   body{
-    margin:0; background:#030604; color:#fff;
+    margin:0; background:#000; color:#fff;
     display:grid; place-items:center; overflow:hidden;
     font-family: 'Euphorigenic','Noto Serif KR', serif;
   }
@@ -24,6 +24,7 @@
   /* 16:9 중앙 스테이지 */
   .stage{
     width: var(--stage-w);
+    max-width: 1700px;
     aspect-ratio: 16/9;
     position: relative;
   }
@@ -76,20 +77,24 @@
     border:none;
   }
   .plant-image:hover{
-    transform: translateY(-2px) scale(1.02);
+    /* transform: translateY(-2px) scale(1.02);
     box-shadow: 0 6px 18px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.15) inset;
-    opacity: .95;
+    opacity: .95; */
+    filter: grayscale(100%);   /* 흑백 변환만 유지 */
+    transform: none;           /* 확대 효과 제거 */
+    box-shadow: none;          /* 그림자 제거 */
+    opacity: 1; 
   }
 
   /* (선택) 좌측 호버 메뉴 유지하고 싶으면 주석 해제 */
-  .side-wrap{ position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:20; }
+  /* .side-wrap{ position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:20; }
   .menu-fab{ width:40px; height:40px; border-radius:50%; border:1px solid #333;
              background:rgba(0,0,0,.5); color:#fff; cursor:pointer; }
   .side-menu{ display:none; position:absolute; left:48px; top:0; background:rgba(0,0,0,.7);
               border:1px solid #333; border-radius:8px; padding:8px 10px; }
   .side-wrap:hover .side-menu{ display:block; }
   .menu-link{ display:block; padding:6px 8px; color:#fff; text-decoration:none; font-size:14px; }
-  .menu-link:hover{ text-decoration:underline; }
+  .menu-link:hover{ text-decoration:underline; } */
 </style>
 </head>
 
@@ -117,13 +122,13 @@
 
 <body>
   <!-- (선택) 좌측 호버 메뉴 -->
-  <nav class="side-wrap">
+  <!-- <nav class="side-wrap">
     <button class="menu-fab" aria-label="메뉴 열기">☰</button>
     <aside class="side-menu">
       <a class="menu-link" href="index.html">홈</a>
       <a class="menu-link" href="guestbook.html">방명록</a>
     </aside>
-  </nav>
+  </nav> -->
 
   <main class="stage">
     <div class="frame" aria-hidden="true"></div>
