@@ -9,9 +9,10 @@ const bMax = 120;
 
 let W, H; // 동적으로 할당
 
+// TODO: 이미지 경로 바꾸기
 function preload(){
   for (let i = 0; i < totalFrames; i++){
-    frames[i] = loadImage(`images/frames10/${i+1}.jpg`);
+    frames[i] = loadImage(`images/frames10/${i+1}.jpg`); 
   }
 }
 
@@ -20,9 +21,9 @@ function setup(){
 
   // visual-area의 실제 크기를 계산해서 캔버스 크기로 사용
   const container = document.getElementById('js-canvas-container');
-  const rect = container.getBoundingClientRect();
-  W = rect.width;
-  H = rect.height;
+  // const rect = container.getBoundingClientRect();
+  W = container.clientWidth;
+  H = container.clientHeight;
 
   const cnv = createCanvas(W, H);
   cnv.parent('js-canvas-container');
@@ -69,10 +70,22 @@ function draw(){
   // 비디오
   const img = frames[frameIndex];
   if (img) {
-    const drawW = 500;
-    const drawH = 600;
+    // 캔버스(컨테이너) 크기에 맞춰 비율 유지하며 그리기
+    // 1차로 세로(height)에 맞추고, 너무 넓으면 가로(width)에 맞춤
+    let drawW, drawH;
 
-    // 가운데 정렬
+        // 세로 기준 스케일
+    let scale = height / img.height;
+    drawH = height;
+    drawW = img.width * scale;
+
+    // 만약 가로를 넘치면, 가로 기준으로 다시 스케일
+    if (drawW > width) {
+      scale = width / img.width;
+      drawW = width;
+      drawH = img.height * scale;
+    }
+
     const offsetX = (width - drawW) / 2;
     const offsetY = (height - drawH) / 2;
 
@@ -87,7 +100,14 @@ function draw(){
 // 창 크기 바뀌면 자동 리사이즈
 function windowResized(){
   const container = document.getElementById('js-canvas-container');
-  const rect = container.getBoundingClientRect();
-  resizeCanvas(rect.width, rect.height);
-  capture.size(rect.width, rect.height);
+  if (!container) return;
+
+  // 너무 작아지면 최소 크기 보장
+  W = Math.max(50, container.clientWidth);
+  H = Math.max(50, container.clientHeight);
+
+  resizeCanvas(W, H);
+  if (capture) {
+    capture.size(W, H);
+  }
 }

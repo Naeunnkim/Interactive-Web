@@ -12,7 +12,7 @@ let W, H; // 동적으로 할당
 // TODO: 이미지 경로 바꾸기
 function preload(){
   for (let i = 0; i < totalFrames; i++){
-    frames[i] = loadImage(`images/frames01/${i+1}.jpg`);
+    frames[i] = loadImage(`images/frames01/${i+1}.jpg`); 
   }
 }
 

@@ -13,40 +13,53 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.1/p5.min.js"></script>
 
   <style>
+    :root{
+      --stage-w: min(100vw, calc(100vh * 16 / 9));  /* 화면 비율 16:9에 맞춰 최대한 크게 */
+    }
+
+    html, body{
+      height:100%;
+    }
+
     body{
       margin:0; 
       background:#030604; 
       color:#fff;
       font-family:'Euphorigenic','Noto Serif KR',serif;
-      height:100vh; 
-      width:100vw;
-      display:flex; 
-      justify-content:center; 
-      align-items:center;
-      overflow: hidden;
+      display:grid; 
+      place-items:center;
+      overflow:hidden;
     }
     
-    .detail-container{ 
-      display:flex;
-      width: 100vw;
-      height: 100vh;
-      max-width: 100vw;
-      max-height: 100vh;
+    /* 16:9 프레임 컨테이너 (홈 화면과 동일한 프레임 크기) */
+    .stage{
+      width: var(--stage-w);
+      aspect-ratio: 16/9;
       position: relative;
     }
 
-    /* 화면 비율에 따라 조정 */
-    @media (min-aspect-ratio: 16/9) {
-      .detail-container {
-        width: calc(100vh * 16 / 9);
-        height: 100vh;
-      }
+    /* 프레임 PNG (검정 배경 + 흰 장식) */
+    .frame{
+      position:absolute; 
+      inset:0;
+      z-index: 1000;   /* 추가 */
+      pointer-events: none; /* 클릭 막지 않기 */
+      background: url("images/designsources/frame_transparent.png") center/contain no-repeat;
     }
-    @media (max-aspect-ratio: 16/9) {
-      .detail-container {
-        width: 100vw;
-        height: calc(100vw * 9 / 16);
-      }
+
+    /* 프레임 내부 실제 컨텐츠 영역 */
+    .detail-container{ 
+      position:absolute;
+      inset:0;
+      display:flex;
+      width: auto;
+      height: auto;
+      box-sizing:border-box;
+
+      top: 5%;
+      bottom: 5%;
+      left: 10%;
+      right: 3%;
     }
 
     /* 왼쪽: 인터랙티브 비주얼 (50%) */
@@ -75,6 +88,7 @@
       max-height: 100% !important;
       width: auto !important;
       height: auto !important;
+      object-fit: contain;
     }
     
     /* p5가 만드는 <video>는 동작만 하고 화면에 안 보이게 */
@@ -87,62 +101,69 @@
       pointer-events:none; 
     }
 
-    /* 오른쪽: 설명 이미지 패널 (50%) - 선 제거 */
+    /* 오른쪽: 설명 이미지 패널 (50%) */
     .info-area{
       width: 50%;
       height: 100%;
       box-sizing:border-box;
       background:#030604;
-      /* border-left 제거 */
       display:flex; 
       align-items:center; 
       justify-content:center;
       overflow:hidden;
-      padding: 0; /* 패딩 제거로 이미지가 꽉 차게 */
+      padding: 0;
     }
     
     .info-img{
       width: 100%; 
-      height: 100%; /* 세로로 꽉 채우기 */
-      object-fit: cover; /* contain에서 cover로 변경 - 세로를 채우고 가로는 잘림 */
-      display:block;
-      image-rendering:auto;
+      height: 100%;
+      object-fit: contain;
+      background: black;
+      /* display:block;
+      image-rendering:auto; */
     }
 
-    .back-link{
-      position:absolute; 
-      top: 2vh;
-      left: 2vh;
-      z-index:10;
-      color:#fff; 
-      font-size: 2vw;
-      text-decoration:none;
-      transition: opacity 0.3s;
+    .back-icon{
+      position:absolute;
+      top: 10%;
+      left: 3%;
+      z-index: 2000;
+      width: 25px;
+      height: auto;
+      display:block;
     }
-    .back-link:hover {
-      opacity: 0.7;
+
+    .back-icon img{
+      width:100%;
+      height:auto;
+      display:block;
     }
+  
   </style>
 </head>
 
 <body>
-  <div class="detail-container">
-    <div class="visual-area">
-      <a href="index.html" class="back-link">&larr;</a>
-      <!-- p5 캔버스가 붙는 곳 -->
-      <div id="js-canvas-container"></div>
-    </div>
+  <main class="stage">
+    <div class="frame" aria-hidden="true"></div>
 
-    <!-- 오른쪽: 설명 이미지 -->
-    <!-- TODO: 설명 이미지 교체-->
-    <div class="info-area">
-      <img src="images/descriptions/06.png" alt="The Smothering Vine 설명" class="info-img">
+    <a href="index.html" class="back-icon">
+          <img src="images/designsources/back_icon.png" alt="뒤로가기" />
+    </a>
+    <div class="detail-container">
+      <div class="visual-area">
+        
+        <!-- p5 캔버스가 붙는 곳 -->
+        <div id="js-canvas-container"></div>
+      </div>
+
+      <!-- 오른쪽: 설명 이미지 -->
+      <div class="info-area">
+        <img src="images/descriptions/06.png" alt="Eternal Thorn 설명" class="info-img">
+      </div>
     </div>
-  </div>
+  </main>
 
   <!-- p5 스케치 (밝기→이미지 맵핑 로직) -->
-   
-  <!-- TODO: js 파일 교체 -->
   <script src="js/06.js"></script>
 
   <!-- 카메라 장치 접근(권한 유도) -->
