@@ -165,16 +165,10 @@
 
   <!-- p5 스케치 (밝기→이미지 맵핑 로직) -->
   <script src="js/01.js"></script>
-
-  <!-- 카메라 장치 접근(권한 유도) -->
-  <script>
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(s => { 
-        console.log("Camera:", s.getVideoTracks()[0]?.label || "ok"); 
-        s.getTracks().forEach(t=>t.stop()); 
-      })
-      .catch(err => console.error("Camera error:", err));
-  </script>
+  <!-- NOTE: Do not open then immediately stop the camera here —
+       let the p5 sketch (`js/01.js`) request and manage the camera stream.
+       If you only need to check permission, use the Permissions API below.
+  -->
   <script>
    (async () => {
      try {
