@@ -2,15 +2,13 @@ let totalFrames = 420;
 let frames = new Array(totalFrames);
 let capture;
 
-// [수정] 차이값을 부드럽게 만들기 위한 변수 (초기값 0)
 let brightSmoothed = 0; 
-
-// [수정] 배경 밝기를 기억할 변수 (전역 변수로 이동!)
 let backgroundAvg = -1; 
 
-// [중요] 감도 설정 (이 숫자가 작을수록 반응이 빨라짐)
-// 20: 작은 그림자에도 반응 / 50: 큰 그림자에만 반응
-const sensitivity = 20; 
+// [핵심 설정 1] 감도(Sensitivity)
+// 변화량이 1~2밖에 안 된다면, 이 값을 '5' 정도로 아주 낮추세요.
+// 의미: 밝기 차이가 5만 나도 프레임 끝까지 재생해라.
+const sensitivity = 8; 
 
 let W, H; 
 
@@ -29,12 +27,18 @@ function setup(){
   const cnv = createCanvas(W, H);
   cnv.parent('js-canvas-container');
 
+  // 카메라 설정
   capture = createCapture({
     audio: false,
-    video: { width: 320, height: 240, frameRate: 30 } // [성능팁] 분석용 해상도는 낮춤
+    video: { width: 320, height: 240, frameRate: 30 }
   }, () => console.log('camera ready'));
-  capture.size(320, 240); // 캡처 크기도 작게 고정
+  capture.size(320, 240);
   capture.hide();
+
+  // [핵심 설정 2] 웹캠 영상 자체에 고대비 필터 적용 (요청하신 부분)
+  // contrast(200%): 대비 2배 강화 (회색이 검정/흰색으로 극명하게 나뉨)
+  // brightness(1.2): 약간 밝게 해서 어두운 곳 노이즈 방지
+  capture.style('filter', 'contrast(200%) brightness(120%) grayscale(100%)');
 
   frameRate(24);
   imageMode(CORNER);
@@ -43,19 +47,18 @@ function setup(){
 function draw(){
   background(0);
 
-  // 1. 카메라 픽셀 읽기
   capture.loadPixels();
   let avg = 0, cnt = 0;
-  const step = 4; // [성능팁] 해상도를 낮췄으므로 step을 조금 더 촘촘하게(4) 해도 됨
+  const step = 4; 
 
   if (capture.pixels.length > 0){
     for (let y = 0; y < capture.height; y += step){
       for (let x = 0; x < capture.width; x += step){
         const idx = 4 * (x + y * capture.width);
+        // 필터가 적용된 픽셀값을 가져오거나, raw 데이터를 가져옵니다.
         const r = capture.pixels[idx];
         const g = capture.pixels[idx + 1];
         const b = capture.pixels[idx + 2];
-        // 흑백 밝기(Luma) 계산
         const Y = 0.299*r + 0.587*g + 0.114*b;
         avg += Y; cnt++;
       }
@@ -63,38 +66,33 @@ function draw(){
     avg = cnt ? avg / cnt : 0;
   }
 
-  // 2. 배경 밝기 학습 (첫 프레임 혹은 천천히 적응)
+  // 배경값 학습
   if (backgroundAvg === -1) {
-    backgroundAvg = avg; // 초기화
+    backgroundAvg = avg; 
   } else {
-    // 배경값이 서서히 현재 밝기를 따라감 (조명 변화 대응)
     backgroundAvg = lerp(backgroundAvg, avg, 0.05);
   }
 
-  // 3. 차이 계산 (배경 - 현재)
-  // 값이 양수(+)면: 평소보다 어두워짐 (그림자/사람이 가림)
-  // 값이 음수(-)면: 평소보다 밝아짐
+  // 차이 계산
   let diff = backgroundAvg - avg; 
 
-  // 노이즈 제거: 아주 작은 변화(2 미만)는 무시
-  if (diff < 2) diff = 0;
+  // [핵심 설정 3] 신호 강제 증폭 (Signal Boosting)
+  // 변화량이 1~2밖에 안 되면, 강제로 곱하기를 해서 키워줍니다.
+  // 물리적 필터 없이도 소프트웨어적으로 대비를 높이는 가장 확실한 방법입니다.
+  diff = diff * 3.0; // 차이값을 3배로 뻥튀기
 
-  // 4. 움직임 부드럽게 (Smoothing)
+  // 노이즈 제거 (증폭했으므로 기준도 약간 높임)
+  if (diff < 1) diff = 0;
+
   brightSmoothed = lerp(brightSmoothed, diff, 0.15);
 
-  // 5. 프레임 매핑 (핵심 수정 구간)
-  // 차이(diff)가 0이면 -> 0번 프레임
-  // 차이(diff)가 sensitivity(20) 이상이면 -> 끝 번호 프레임
+  // 매핑: 증폭된 diff 값을 기준으로 프레임 전환
   let frameIndex = map(brightSmoothed, 0, sensitivity, 0, totalFrames - 1);
   
-  // 범위 벗어나지 않게 고정
   frameIndex = constrain(frameIndex, 0, totalFrames - 1);
-  
-  // 정수로 변환
   frameIndex = Math.floor(frameIndex);
 
-
-  // --- 여기서부터 이미지는 그리는 영역 (이전과 동일) ---
+  // 이미지 그리기
   const img = frames[frameIndex];
   if (img) {
     let drawW, drawH;
@@ -113,10 +111,10 @@ function draw(){
 
     image(img, offsetX, offsetY, drawW, drawH);
   }
-
-  // [디버깅용] 수치 확인이 필요하면 주석 해제하세요
-  // fill(255); textSize(16);
-  // text(`Diff: ${diff.toFixed(1)} / Index: ${frameIndex}`, 10, 30);
+  
+  // [디버깅] 값이 너무 작으면 콘솔이나 화면에 찍어서 확인해보세요
+  // fill(0, 255, 0); textSize(20);
+  // text(`Diff: ${diff.toFixed(2)}`, 50, 50);
 }
 
 function windowResized(){
@@ -125,5 +123,4 @@ function windowResized(){
   W = Math.max(50, container.clientWidth);
   H = Math.max(50, container.clientHeight);
   resizeCanvas(W, H);
-  // 캡처 크기는 리사이즈 하지 않고 작게 유지(320x240)하는 것이 성능에 좋음
 }
