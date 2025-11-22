@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#030604" />
+  <meta name="theme-color" content="black" />
   <title>Poison Garden - Unguentum Mortis</title>
   <link rel="stylesheet" href="style.css" />
 
@@ -22,15 +22,15 @@
     }
 
     body{
-      margin:0; 
-      background:#030604; 
+      margin:0;
+      background:black;
       color:#fff;
       font-family:'Euphorigenic','Noto Serif KR',serif;
-      display:grid; 
+      display:grid;
       place-items:center;
       overflow:hidden;
     }
-    
+   
     /* 16:9 프레임 컨테이너 (홈 화면과 동일한 프레임 크기) */
     .stage{
       width: var(--stage-w);
@@ -40,7 +40,7 @@
 
     /* 프레임 PNG (검정 배경 + 흰 장식) */
     .frame{
-      position:absolute; 
+      position:absolute;
       inset:0;
       z-index: 1000;   /* 추가 */
       pointer-events: none; /* 클릭 막지 않기 */
@@ -48,7 +48,7 @@
     }
 
     /* 프레임 내부 실제 컨텐츠 영역 */
-    .detail-container{ 
+    .detail-container{
       position:absolute;
       inset:0;
       display:flex;
@@ -56,8 +56,8 @@
       height: auto;
       box-sizing:border-box;
 
-      top: 5%;
-      bottom: 5%;
+      top: 10%;
+      bottom: 6.5%;
       left: 10%;
       right: 3%;
     }
@@ -66,23 +66,23 @@
     .visual-area{
       width: 50%;
       height: 100%;
-      position:relative; 
-      display:flex; 
-      align-items:center; 
+      position:relative;
+      display:flex;
+      align-items:center;
       justify-content:center;
-      background:#030604; 
+      background:black;
       overflow:hidden;
     }
-    
+   
     #js-canvas-container{
-      width:100%; 
+      width:100%;
       height:100%;
-      display:flex; 
-      align-items:center; 
-      justify-content:center; 
-      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;   /* 로딩 오버레이 기준 */
     }
-    
+   
     #js-canvas-container canvas {
       max-width: 100% !important;
       max-height: 100% !important;
@@ -90,15 +90,35 @@
       height: auto !important;
       object-fit: contain;
     }
-    
+
+    /* p5 preload 로딩 화면: 왼쪽 비주얼 영역 중심에 오버레이 */
+    #p5_loading{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:black;   /* 필요하면 투명하게: background: transparent; */
+      z-index: 10;
+    }
+
+    #p5_loading .loading-inner{
+      font-family:'Euphorigenic','Noto Serif KR',serif;
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color:#f5efe0;
+      opacity:0.9;
+    }
+   
     /* p5가 만드는 <video>는 동작만 하고 화면에 안 보이게 */
-    video{ 
-      position:absolute; 
-      left:-9999px; 
-      width:1px; 
-      height:1px; 
-      opacity:0; 
-      pointer-events:none; 
+    video{
+      position:absolute;
+      left:-9999px;
+      width:1px;
+      height:1px;
+      opacity:0;
+      pointer-events:none;
     }
 
     /* 오른쪽: 설명 이미지 패널 (50%) */
@@ -106,21 +126,19 @@
       width: 50%;
       height: 100%;
       box-sizing:border-box;
-      background:#030604;
-      display:flex; 
-      align-items:center; 
+      background:black;
+      display:flex;
+      align-items:center;
       justify-content:center;
       overflow:hidden;
       padding: 0;
     }
-    
+   
     .info-img{
-      width: 100%; 
+      width: 100%;
       height: 100%;
       object-fit: contain;
       background: black;
-      /* display:block;
-      image-rendering:auto; */
     }
 
     .back-icon{
@@ -138,7 +156,7 @@
       height:auto;
       display:block;
     }
-  
+ 
   </style>
 </head>
 
@@ -147,13 +165,20 @@
     <div class="frame" aria-hidden="true"></div>
 
     <a href="index.html" class="back-icon">
-          <img src="images/designsources/back_icon.png" alt="뒤로가기" />
+      <img src="images/designsources/back_icon.png" alt="뒤로가기" />
     </a>
+
     <div class="detail-container">
       <div class="visual-area">
-        
         <!-- p5 캔버스가 붙는 곳 -->
-        <div id="js-canvas-container"></div>
+        <div id="js-canvas-container">
+          <!-- p5 preload용 커스텀 로딩 화면 (왼쪽 영역 중심) -->
+          <div id="p5_loading">
+            <div class="loading-inner">
+              LOADING
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 오른쪽: 설명 이미지 -->
@@ -166,14 +191,20 @@
   <!-- p5 스케치 (밝기→이미지 맵핑 로직) -->
   <script src="js/02.js"></script>
 
-  <!-- 카메라 장치 접근(권한 유도) -->
+  <!-- 카메라 권한 상태만 체크 (실제 스트림은 p5에서 관리) -->
   <script>
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(s => { 
-        console.log("Camera:", s.getVideoTracks()[0]?.label || "ok"); 
-        s.getTracks().forEach(t=>t.stop()); 
-      })
-      .catch(err => console.error("Camera error:", err));
+   (async () => {
+     try {
+       if (navigator.permissions && navigator.permissions.query) {
+         const status = await navigator.permissions.query({ name: 'camera' });
+         console.log('camera permission state:', status.state); // granted|denied|prompt
+       } else {
+         console.log('Permissions API not available — do not pre-open camera.');
+       }
+     } catch (err) {
+       console.warn('permission check failed', err);
+     }
+   })();
   </script>
 </body>
 </html>

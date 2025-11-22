@@ -3,16 +3,15 @@ let frames = new Array(totalFrames);
 let capture;
 let brightSmoothed = 128;
 
-// 실측 밝기 범위
-const bMin = 0;
-const bMax = 120;
+// 손을 "가까이" / "멀리" 둘 때의 실측 밝기 값
+const bNear = 100;  // 손을 센서 앞에 근접하게 둘 때 avg 밝기
+const bFar  = 127;  // 손을 멀리 치웠을 때 avg 밝기
 
 let W, H; // 동적으로 할당
 
-// TODO: 이미지 경로 바꾸기
 function preload(){
   for (let i = 0; i < totalFrames; i++){
-    frames[i] = loadImage(`images/frames04/${i+1}.jpg`); 
+    frames[i] = loadImage(`images/frames04/${i+1}.jpg`);
   }
 }
 
@@ -21,7 +20,6 @@ function setup(){
 
   // visual-area의 실제 크기를 계산해서 캔버스 크기로 사용
   const container = document.getElementById('js-canvas-container');
-  // const rect = container.getBoundingClientRect();
   W = container.clientWidth;
   H = container.clientHeight;
 
@@ -46,7 +44,7 @@ function draw(){
   // 평균 밝기 계산
   capture.loadPixels();
   let avg = 0, cnt = 0;
-  const step = 8;
+  const step = 2;
   if (capture.pixels.length > 0){
     for (let y = 0; y < capture.height; y += step){
       for (let x = 0; x < capture.width; x += step){
@@ -55,31 +53,37 @@ function draw(){
         const g = capture.pixels[idx + 1];
         const b = capture.pixels[idx + 2];
         const Y = 0.299*r + 0.587*g + 0.114*b;
-        avg += Y; cnt++;
+        avg += Y;
+        cnt++;
       }
     }
     avg = cnt ? avg / cnt : 0;
   }
 
-  brightSmoothed = lerp(brightSmoothed, avg, 0.15);
+  // 부드럽게 따라가도록 스무딩
+  brightSmoothed = lerp(brightSmoothed, avg, 0.0777777); // 0.15  !!!!!!
 
-  const bClamped = constrain(brightSmoothed, bMin, bMax);
-  let frameIndex = Math.round(map(bClamped, bMin, bMax, totalFrames-1, 0));
-  frameIndex = constrain(frameIndex, 0, totalFrames-1);
+  // 내가 측정한 범위(bNear ~ bFar) 안으로 자르기
+  const bClamped = constrain(brightSmoothed, bNear, bFar);
 
-  // 비디오
+  // bNear(손 가까이) → frameIndex = 0 (1.jpg)
+  // bFar(손 멀리)   → frameIndex = totalFrames-1 (420.jpg)
+  let frameIndex = Math.round(
+    map(bClamped, bFar, bNear, 0, totalFrames - 1)
+  );
+  frameIndex = constrain(frameIndex, 0, totalFrames - 1);
+
+  // 비디오 프레임 그리기
   const img = frames[frameIndex];
   if (img) {
-    // 캔버스(컨테이너) 크기에 맞춰 비율 유지하며 그리기
-    // 1차로 세로(height)에 맞추고, 너무 넓으면 가로(width)에 맞춤
     let drawW, drawH;
 
-        // 세로 기준 스케일
+    // 세로(height)에 먼저 맞추기
     let scale = height / img.height;
     drawH = height;
     drawW = img.width * scale;
 
-    // 만약 가로를 넘치면, 가로 기준으로 다시 스케일
+    // 가로를 넘치면, 가로 기준으로 다시 스케일
     if (drawW > width) {
       scale = width / img.width;
       drawW = width;
@@ -92,9 +96,13 @@ function draw(){
     image(img, offsetX, offsetY, drawW, drawH);
   }
 
-  // 디버그 텍스트
-  // noStroke(); fill(255); textSize(14);
-  // text(`avg: ${avg.toFixed(1)} sm: ${brightSmoothed.toFixed(1)}`, 10, 20);
+  // 디버그 보고 싶으면 주석 해제
+  /*
+  noStroke();
+  fill(255);
+  textSize(14);
+  text(`avg: ${avg.toFixed(1)}  sm: ${brightSmoothed.toFixed(1)}  idx: ${frameIndex}`, 10, 20);
+  */
 }
 
 // 창 크기 바뀌면 자동 리사이즈
@@ -102,7 +110,6 @@ function windowResized(){
   const container = document.getElementById('js-canvas-container');
   if (!container) return;
 
-  // 너무 작아지면 최소 크기 보장
   W = Math.max(50, container.clientWidth);
   H = Math.max(50, container.clientHeight);
 

@@ -18,7 +18,7 @@ html, body {
 /* 기본적인 스타일 초기화 및 배경 */
 body {
     margin: 0;
-    background-color: #030604; /* 검은색 배경 */
+    background-color: black; /* 검은색 배경 */
     color: #fff;
     font-family: Arial, sans-serif;
     text-align: center;
