@@ -175,5 +175,19 @@
       })
       .catch(err => console.error("Camera error:", err));
   </script>
+  <script>
+   (async () => {
+     try {
+       if (navigator.permissions && navigator.permissions.query) {
+         const status = await navigator.permissions.query({ name: 'camera' });
+         console.log('camera permission state:', status.state); // granted|denied|prompt
+       } else {
+         console.log('Permissions API not available — do not pre-open camera.');
+       }
+     } catch (err) {
+       console.warn('permission check failed', err);
+     }
+   })();
+  </script>
 </body>
 </html>
