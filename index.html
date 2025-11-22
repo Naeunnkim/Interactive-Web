@@ -46,8 +46,8 @@
 
   /* 갤러리 그리드: 6열(가변), 여백 균등 */
   .gallery-grid{
-    width:60%;                   /* ← 전체 폭 대비 살짝 여유 */
-    max-width: 1100px;           /* ← 프레임 안쪽에 fit */
+    width:100%;                   /* ← 전체 폭 대비 살짝 여유 */
+    max-width: 1700px;           /* ← 프레임 안쪽에 fit */
     margin-top: clamp(48px, 10vh, 120px);
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -86,16 +86,6 @@
     box-shadow: none;          /* 그림자 제거 */
     opacity: 1; 
   }
-
-  /* (선택) 좌측 호버 메뉴 유지하고 싶으면 주석 해제 */
-  /* .side-wrap{ position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:20; }
-  .menu-fab{ width:40px; height:40px; border-radius:50%; border:1px solid #333;
-             background:rgba(0,0,0,.5); color:#fff; cursor:pointer; }
-  .side-menu{ display:none; position:absolute; left:48px; top:0; background:rgba(0,0,0,.7);
-              border:1px solid #333; border-radius:8px; padding:8px 10px; }
-  .side-wrap:hover .side-menu{ display:block; }
-  .menu-link{ display:block; padding:6px 8px; color:#fff; text-decoration:none; font-size:14px; }
-  .menu-link:hover{ text-decoration:underline; } */
 </style>
 </head>
 
@@ -122,15 +112,6 @@
 </script>
 
 <body>
-  <!-- (선택) 좌측 호버 메뉴 -->
-  <!-- <nav class="side-wrap">
-    <button class="menu-fab" aria-label="메뉴 열기">☰</button>
-    <aside class="side-menu">
-      <a class="menu-link" href="index.html">홈</a>
-      <a class="menu-link" href="guestbook.html">방명록</a>
-    </aside>
-  </nav> -->
-
   <main class="stage">
     <div class="frame" aria-hidden="true"></div>
 
