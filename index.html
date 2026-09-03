@@ -2,8 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>Poison Garden</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Poison Garden — an interactive botanical gallery driven by camera brightness." />
+<title>Poison Garden — Interactive Botanical Gallery</title>
 
 <link rel="stylesheet" href="style.css" />
 
@@ -89,35 +90,13 @@
 </style>
 </head>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const imgs = document.querySelectorAll('.plant-image[data-bm]');
-
-    imgs.forEach(img => {
-        const original = img.getAttribute('src');
-        const bm       = img.getAttribute('data-bm');
-
-        // 원본 경로 저장
-        img.dataset.original = original;
-
-        img.addEventListener('mouseenter', () => {
-        img.src = bm;
-        });
-
-        img.addEventListener('mouseleave', () => {
-        img.src = img.dataset.original;
-        });
-    });
-    });
-</script>
-
 <body>
   <main class="stage">
     <div class="frame" aria-hidden="true"></div>
 
     <div class="content">
       <!-- 갤러리 -->
-      <div class="gallery-grid">
+      <div class="gallery-grid" aria-label="Poison plant specimens">
         <a href="detail01.html" class="plant-button">
             <img src="images/plant/1.png"
                 data-bm="images/plant_bitmap/1_bm.png"
@@ -229,5 +208,6 @@
 
     </div>
   </main>
+  <script src="js/gallery.js"></script>
 </body>
 </html>

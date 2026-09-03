@@ -20,7 +20,7 @@ body {
     margin: 0;
     background-color: #030604; /* 검은색 배경 */
     color: #fff;
-    font-family: Arial, sans-serif;
+    font-family: 'Euphorigenic', 'Noto Serif KR', serif;
     text-align: center;
     
     /* 뷰포트 전체를 사용하고 중앙 정렬 */
@@ -170,6 +170,13 @@ h1 {
     box-shadow: none;
 }
 
+.plant-button:focus-visible,
+.back-icon:focus-visible,
+.back-link:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 5px;
+}
+
 /* 이미지 스타일 */
 .plant-image {
     /* 셀의 높이에 맞추되, 가로는 자동으로 조정하여 잘리지 않게 표시 */
@@ -227,3 +234,38 @@ h1 {
 }
 .gb-meta { font-size: 12px; color: #bcbcbc; opacity: .9; margin-bottom: 6px;}
 .gb-name { font-weight: 700; }
+
+.interaction-status {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  z-index: 2;
+  max-width: min(92%, 360px);
+  margin: 0;
+  padding: 6px 9px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(3, 6, 4, 0.72);
+  font: 11px/1.4 Arial, sans-serif;
+  letter-spacing: 0.02em;
+  text-align: left;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .interaction-status {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-width: none;
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}

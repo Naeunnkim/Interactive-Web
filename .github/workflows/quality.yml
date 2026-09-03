@@ -1,0 +1,27 @@
+name: Static project checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate pages and frame assets
+        run: node scripts/check-project.mjs
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: for file in js/*.js; do node --check "$file"; done

@@ -2,11 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Poison Garden interactive detail for Poison Plant 11." />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#030604" />
-  <title>Poison Garden - Unguentum Mortis</title>
+  <title>Poison Garden — Poison Plant 11</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- p5.js -->
@@ -158,22 +159,12 @@
 
       <!-- 오른쪽: 설명 이미지 -->
       <div class="info-area">
-        <img src="images/descriptions/11.png" alt="Eternal Thorn 설명" class="info-img">
+        <img src="images/descriptions/11.png" alt="Poison Plant 11 description" class="info-img">
       </div>
     </div>
   </main>
 
-  <!-- p5 스케치 (밝기→이미지 맵핑 로직) -->
   <script src="js/11.js"></script>
-
-  <!-- 카메라 장치 접근(권한 유도) -->
-  <script>
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(s => { 
-        console.log("Camera:", s.getVideoTracks()[0]?.label || "ok"); 
-        s.getTracks().forEach(t=>t.stop()); 
-      })
-      .catch(err => console.error("Camera error:", err));
-  </script>
+  <script src="js/interactive-frame.js"></script>
 </body>
 </html>
