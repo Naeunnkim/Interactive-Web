@@ -14,7 +14,6 @@
 - **Visual system**: 투명 프레임 PNG, 식물 원본/bitmap hover 상태, 표본 설명 패널
 - **Runtime**: 별도 빌드 도구 없이 정적 HTML/CSS/JavaScript로 실행
 
-이 저장소는 작품 구현과 원본 에셋을 함께 보관하는 프로젝트 포트폴리오용 레포입니다. 개인 이력이나 팀 구성에 관한 정보는 확인 가능한 자료가 없어 README에 추정해 기재하지 않았습니다.
 
 ## Try it locally
 
@@ -35,7 +34,7 @@ python3 -m http.server 4173
 3. `draw()`가 영상의 평균 밝기를 계산하고, 스무딩·범위 제한·프레임 매핑을 적용합니다.
 4. 카메라 입력이 없으면 첫 프레임을 유지하고, 키보드 입력으로 수동 탐색할 수 있습니다.
 
-01번 표본은 배경 밝기와 현재 밝기의 차이를 사용하는 별도 튜닝을 유지합니다. 05번 세트는 현재 체크아웃에서 `136.jpg`가 제외되어 있어 [`js/05.js`](js/05.js)의 설정이 없는 소스 번호를 요청하지 않도록 처리합니다.
+
 
 ## Repository map
 
@@ -52,7 +51,7 @@ images/designsources/      # 프레임, 로고, 폰트 등 디자인 소스
 scripts/check-project.mjs  # 로컬 경로·프레임·페이지 계약 검사
 ```
 
-`detail_page.html`, `guestbook.html`, `js/sketch.js`, `js/Eternal_Thorn.js`는 현재 홈 진입 흐름에서 사용하지 않는 과거 실험 파일로 보존되어 있습니다. 이 파일을 삭제하지 않은 것은 이전 작업의 맥락과 원본 자료를 유지하기 위해서입니다.
+
 
 ## Validation
 
@@ -63,10 +62,6 @@ git diff --check
 ```
 
 GitHub Actions에서도 경로와 프레임 계약 검사를 실행합니다. 이 프로젝트는 p5.js 1.9.1을 CDN에서 불러오므로, 최초 로딩 시 네트워크 연결이 필요합니다.
-
-## CV-ready summary
-
-> **Poison Garden** — Camera-reactive interactive graduation project. Built a static browser experience that maps webcam luminance to frame-sequenced botanical visuals, with 18 specimen detail views, responsive framing, keyboard fallback, and a dependency-free validation workflow.
 
 ## Asset and license note
 
